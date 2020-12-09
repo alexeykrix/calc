@@ -1,2 +1,1 @@
-# calc
-fancy calculator on js
+# https://alexeykrix.github.io/calc/
