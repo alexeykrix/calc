@@ -46,6 +46,7 @@ const template =  `
 let elem = document.createElement('div')
 elem.innerHTML = template
 document.body.appendChild(elem)
+let value = ''
 
 let values = ['']
 
@@ -92,6 +93,19 @@ const evalHandler = (i,  t) => {
 
 const actionHandler = (i, t, data) => {
     if (data === 'del') {
+      if (value !== '') {
+        value = ''
+        let old = ''
+        values.forEach((el, id) => {
+          if (id === values.length-1) return
+          if ((el === '-' || el === '÷' ||
+              el === '×' || el === '+') && id === i ) return
+          old += el + ' '
+        })
+        setOld(old)
+        setEval(values[i])
+        return
+      }
       if (values[i].length>1) {
         if (values[i].length === 2 && values[i][0] === '-') {
           values[i] = ''
@@ -144,6 +158,12 @@ const actionHandler = (i, t, data) => {
       }  
     }
     if (data === 'minus') {
+      i = values.length-1 > 0 ? values.length-1 : 0 
+      if (value !== '') {
+        values = [value]
+        value = ''
+        i = values.length-1 > 0 ? values.length-1 : 0 
+      }
       if (values[0] === '') values[0] = '0'
       if (values[i] === '-' ||
         values[i] === '÷' ||
@@ -161,6 +181,12 @@ const actionHandler = (i, t, data) => {
       setOld(old)
     }
     if (data === 'plus') {
+      i = values.length-1 > 0 ? values.length-1 : 0 
+      if (value !== '') {
+        values = [value]
+        value = ''
+        i = values.length-1 > 0 ? values.length-1 : 0 
+      }
       if (values[0] === '') values[0] = '0'
       if (values[i] === '-' ||
         values[i] === '÷' ||
@@ -178,6 +204,12 @@ const actionHandler = (i, t, data) => {
       setOld(old)
     }
     if (data === 'split') {
+      i = values.length-1 > 0 ? values.length-1 : 0 
+      if (value !== '') {
+        values = [value]
+        value = ''
+        i = values.length-1 > 0 ? values.length-1 : 0 
+      }
       if (values[0] === '') values[0] = '0'
       if (values[i] === '-' ||
         values[i] === '÷' ||
@@ -195,6 +227,12 @@ const actionHandler = (i, t, data) => {
       setOld(old)
     }
     if (data === 'multy') {
+      i = values.length-1 > 0 ? values.length-1 : 0 
+      if (value !== '') {
+        values = [value]
+        value = ''
+        i = values.length-1 > 0 ? values.length-1 : 0 
+      }
       if (values[0] === '') values[0] = '0'
       if (values[i] === '-' ||
         values[i] === '÷' ||
@@ -211,8 +249,8 @@ const actionHandler = (i, t, data) => {
       })
       setOld(old)
     }
-  
     if (data === 'invert') {
+      i = values.length-1 > 0 ? values.length-1 : 0 
       if (values[i] === '-' ||
         values[i] === '÷' ||
         values[i] === '×' ||
@@ -231,6 +269,9 @@ const actionHandler = (i, t, data) => {
         old += el + ' '
       })
       setOld(old)
+      if (value !== '') {
+        evalHandler(i, t)
+      }
     }
 
     if (!t) return
@@ -239,6 +280,13 @@ const actionHandler = (i, t, data) => {
 }
 
 const numberHandler = (i, t, data) => {
+  i = values.length-1 > 0 ? values.length-1 : 0 
+  if (value !== '') {
+    value = ''
+    values = ['']
+    i=0
+    setOld('')
+  }
   if (values[i] === '-' ||
         values[i] === '÷' ||
         values[i] === '×' ||
