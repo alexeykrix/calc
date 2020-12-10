@@ -65,55 +65,32 @@ const setEval = (ev) => {
 
 const setOld = (ev) => viewOld.innerHTML = ev
 
-const clickHandler = t => {
-  const isActions = t.classList.contains('btn-actions')
-  const isEval = t.classList.contains('btn-evaluate')
-  const data = t.dataset.id
-  if (!data) return
+const evalHandler = (i,  t) => {
+  let expression = ''
+  values.forEach( el => {
+    if (el === '-') expression += '-' 
+    else if (el === '÷') expression += '/' 
+    else if (el === '×') expression += '*' 
+    else if (el === '+') expression += '+' 
+    else expression += el
+  })
 
-  let i = values.length-1 > 0 ? values.length-1 : 0 
-  
-  if (data !== ',' && !isActions && !isEval) { // enter a number
-    if (values[i] === '-' ||
-        values[i] === '÷' ||
-        values[i] === '×' ||
-        values[i] === '+' ) {
-      let old = ''
-      values.forEach((el, id) => {
-        if ((el === '-' || el === '÷' ||
-            el === '×' || el === '+') && id === i ) old += el + ' '
-        if (id !== i) old += el + ' '
-      })
-      setOld(old)
-      if (data === 'comma') values.push('0.')
-      else values.push(data)
-      setEval(values[i+1])
-    } else {
-      if (data === 'comma') {
-        if (values[i].indexOf('.')>=0) return
-        if (values[i].length === 0) values[i].length < 15? values[i] += '0.' : ''
-        else values[i].length < 15? values[i] += '.' : ''
-      } else if (data === '0') {
-        if (values[i] === '0')''
-        else values[i].length < 15? values[i] += 0 : ''
-      } else if ( values[i].length < 15) {
-        values[i] === '0'? values[i] = data: values[i] += data 
-      }
-      setEval(values[i])
-    }
-
-    t.classList.add('anim-btn')
-    setTimeout(()=> t.classList.remove('anim-btn'), 400)
+  value = eval(expression).toFixed(8)
+  if (value.indexOf('.') > 0) {
+    value = parseFloat(value)
   }
-  if (isActions) { // enter an operator
-    let old = ''
-    values.forEach((el, id) => {
-      if ((el === '-' || el === '÷' ||
-          el === '×' || el === '+') && id === i ) return
-      old += el + ' '
-    })
-    setOld(old)
 
+  let old = ''
+  values.forEach( el => old += el + ' ')
+  setOld(old)
+  setEval('= '+ (!isNaN(value) ? value :'&#8734;'))
+
+  if (!t) return
+  t.classList.add('anim-operators')
+  setTimeout(()=> t.classList.remove('anim-operators'), 400)
+} 
+
+const actionHandler = (i, t, data) => {
     if (data === 'del') {
       if (values[i].length>1) {
         if (values[i].length === 2 && values[i][0] === '-') {
@@ -163,6 +140,7 @@ const clickHandler = t => {
         
         values[i]= eval(value*values[i]/100)
         setEval(values[i])
+        return
       }  
     }
     if (data === 'minus') {
@@ -254,32 +232,57 @@ const clickHandler = t => {
       })
       setOld(old)
     }
+
+    if (!t) return
     t.classList.add('anim-operators')
     setTimeout(()=> t.classList.remove('anim-operators'), 400)
-  }
+}
 
-  if (isEval) {
-    let expression = ''
-    values.forEach( el => {
-      if (el === '-') expression += '-' 
-      else if (el === '÷') expression += '/' 
-      else if (el === '×') expression += '*' 
-      else if (el === '+') expression += '+' 
-      else expression += el
-    })
-
-    value = eval(expression).toFixed(8)
-    if (value.indexOf('.') > 0) {
-      value = parseFloat(value)
+const numberHandler = (i, t, data) => {
+  if (values[i] === '-' ||
+        values[i] === '÷' ||
+        values[i] === '×' ||
+        values[i] === '+' ) {
+      let old = ''
+      values.forEach((el, id) => {
+        if ((el === '-' || el === '÷' ||
+            el === '×' || el === '+') && id === i ) old += el + ' '
+        if (id !== i) old += el + ' '
+      })
+      setOld(old)
+      if (data === 'comma') values.push('0.')
+      else values.push(data)
+      setEval(values[i+1])
+    } else {
+      if (data === 'comma') {
+        if (values[i].indexOf('.')>=0) return
+        if (values[i].length === 0) values[i].length < 15? values[i] += '0.' : ''
+        else values[i].length < 15? values[i] += '.' : ''
+      } else if (data === '0') {
+        if (values[i] === '0')''
+        else values[i].length < 15? values[i] += 0 : ''
+      } else if ( values[i].length < 15) {
+        values[i] === '0'? values[i] = data: values[i] += data 
+      }
+      setEval(values[i])
     }
 
-    let old = ''
-    values.forEach( el => old += el + ' ')
-    setOld(old)
-    setEval('= '+ (!isNaN(value) ? value :'&#8734;'))
-    t.classList.add('anim-operators')
-    setTimeout(()=> t.classList.remove('anim-operators'), 400)
-  }
+    if (!t) return
+    t.classList.add('anim-btn')
+    setTimeout(()=> t.classList.remove('anim-btn'), 400)
+}
+
+const clickHandler = t => {
+  const isActions = t.classList.contains('btn-actions')
+  const isEval = t.classList.contains('btn-evaluate')
+  const data = t.dataset.id
+  if (!data) return
+
+  let i = values.length-1 > 0 ? values.length-1 : 0 
+  
+  if (data !== ',' && !isActions && !isEval) numberHandler(i, t, data)
+  if (isActions) actionHandler(i, t, data)
+  if (isEval) evalHandler(i, t)
 
   // console.clear()
   // console.log(values)
@@ -289,4 +292,69 @@ main.addEventListener('click', e => clickHandler(e.target))
 theme.addEventListener('click', () => {
   document.querySelector('.calc').classList.toggle('calc-white')
   localStorage.setItem('theme', document.querySelector('.calc').classList)
+})
+document.addEventListener('keydown', e => {
+  let data = ''
+  let isActions = ''
+  let isEval = ''
+
+  if (e.code === 'Numpad0' ||
+      e.code === 'Digit0') data = '0'
+  if (e.code === 'Numpad1' ||
+      e.code === 'Digit1') data = '1'
+  if (e.code === 'Numpad2' ||
+      e.code === 'Digit2') data = '2'
+  if (e.code === 'Numpad3' ||
+      e.code === 'Digit3') data = '3'
+  if (e.code === 'Numpad4' ||
+      e.code === 'Digit4') data = '4'
+  if (e.code === 'Numpad5' ||
+      e.code === 'Digit5') data = '5'
+  if (e.code === 'Numpad6' ||
+      e.code === 'Digit6') data = '6'
+  if (e.code === 'Numpad7' ||
+      e.code === 'Digit7') data = '7'
+  if (e.code === 'Numpad8' ||
+      e.code === 'Digit8') data = '8'
+  if (e.code === 'Numpad9' ||
+      e.code === 'Digit9') data = '9'
+  if (e.code === 'NumpadDecimal' ||
+      e.code === 'Comma' ||
+      e.code === 'Period') data = 'comma'
+  if (e.code === 'NumpadDivide') {
+    data = 'split'
+    isActions = true
+  }
+  if (e.code === 'NumpadMultiply') {
+    data = 'multy'
+    isActions = true
+  }
+  if (e.code === 'NumpadSubtract' || 
+      e.code === 'Minus') {
+    data = 'minus'
+    isActions = true
+  }
+  if (e.code === 'NumpadAdd' || 
+      e.code === 'Equal') {
+    data = 'plus'
+    isActions = true
+  }
+  if (e.code === 'Backspace') {
+    data = 'del'
+    isActions = true
+  }
+  if (e.code === 'NumpadEnter' || 
+      e.code === 'Enter') {
+    data = 'eval'
+    isEval = true
+  }
+
+
+  if (!data) return
+
+  let i = values.length-1 > 0 ? values.length-1 : 0 
+  
+  if (data !== ',' && !isActions && !isEval) numberHandler(i, '', data)
+  if (isActions) actionHandler(i, '', data)
+  if (isEval) evalHandler(i, '')
 })
