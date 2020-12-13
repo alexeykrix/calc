@@ -8,7 +8,6 @@ body {
   background: no-repeat url('https://picsum.photos/1000') center/cover;
 }
 
-
 body>div {
   height: 100%;
   backdrop-filter: blur(10px);
@@ -20,6 +19,10 @@ body>div {
   margin: 0;
   border: none;
   background: transparent;
+}
+
+.theme {
+  z-index: 99;
 }
 
 .theme svg {
@@ -72,6 +75,10 @@ body>div {
   color: #121212;
 }
 
+.calc-white .oldView {
+  color: #616367;
+}
+
 .calc__header {
   text-align: right;
   position: relative;
@@ -99,7 +106,7 @@ body>div {
 
 .oldView {
   font-size: 24px;
-  color: #616367;
+  color: #66676d;
 }
 
 .calc__main {
