@@ -1,5 +1,7 @@
 const template =  `
   <div class="${localStorage.getItem('theme')? localStorage.getItem('theme'): 'calc'}">
+    
+    <header class="calc__header">
     <button class="theme">
       <svg id="bold" height="30" viewBox="0 0 24 24" width="30">
         <path class="lamp" d="m12 3.457c-.414 0-.75-.336-.75-.75v-1.957c0-.414.336-.75.75-.75s.75.336.75.75v1.957c0 .414-.336.75-.75.75z" />
@@ -15,7 +17,6 @@ const template =  `
         <path class="lamp" d="m15.05 19.5v.01c-.02-.01-.03-.01-.05-.01z" />
       </svg>
     </button>
-    <header class="calc__header">
       <div class="oldView"></div>
       <div class="realView">0</div>
     </header>
