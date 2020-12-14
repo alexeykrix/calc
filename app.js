@@ -1,7 +1,7 @@
 const template =  `
   <div class="${localStorage.getItem('theme')? localStorage.getItem('theme'): 'calc'}">
     <button class="theme">
-      <svg id="bold" height="512" viewBox="0 0 24 24" width="512">
+      <svg id="bold" height="30" viewBox="0 0 24 24" width="30">
         <path class="lamp" d="m12 3.457c-.414 0-.75-.336-.75-.75v-1.957c0-.414.336-.75.75-.75s.75.336.75.75v1.957c0 .414-.336.75-.75.75z" />
         <path class="lamp" d="m18.571 6.179c-.192 0-.384-.073-.53-.22-.293-.293-.293-.768 0-1.061l1.384-1.384c.293-.293.768-.293 1.061 0s.293.768 0 1.061l-1.384 1.384c-.147.146-.339.22-.531.22z" />
         <path class="lamp" d="m23.25 12.75h-1.957c-.414 0-.75-.336-.75-.75s.336-.75.75-.75h1.957c.414 0 .75.336.75.75s-.336.75-.75.75z" />
@@ -51,6 +51,7 @@ let value = ''
 let values = ['']
 
 const main = elem.querySelector('main'),
+header = elem.querySelector('header'),
 viewEval = elem.querySelector('.realView'),
 viewOld = elem.querySelector('.oldView'),
 theme = elem.querySelector('.theme')
@@ -91,35 +92,48 @@ const evalHandler = (i,  t) => {
   setTimeout(()=> t.classList.remove('anim-operators'), 400)
 } 
 
-const actionHandler = (i, t, data) => {
-    if (data === 'del') {
-      if (value !== '') {
-        value = ''
-        let old = ''
-        values.forEach((el, id) => {
-          if (id === values.length-1) return
-          if ((el === '-' || el === '÷' ||
-              el === '×' || el === '+') && id === i ) return
-          old += el + ' '
-        })
-        setOld(old)
-        setEval(values[i])
-        return
-      }
-      if (values[i].length>1) {
-        if (values[i].length === 2 && values[i][0] === '-') {
-          values[i] = ''
-        } else values[i] = values[i].slice(0, -1)
-        setEval(values[i])
-      } else {
-        values[i] = ''
-      }
-      if (values[i] === '') {
-        values = values.slice(0, -1)
-      }
+let holdTime = 0
+let holdTimeount = null
 
-      i = values.length-1 > 0 ? values.length-1 : 0 
-      
+document.addEventListener('mouseup', e => {
+  let data = e.target.dataset.id
+  if (data === 'del') {
+    clearInterval(holdTimeount)
+    holdTimeount = null
+    holdTime = 0
+  }
+})
+
+document.addEventListener('touchend', e => {
+  
+  let data = e.target.dataset.id
+  if (data === 'del') {
+    clearInterval(holdTimeount)
+    holdTimeount = null
+    holdTime = 0
+  }
+})
+
+const actionHandler = (i, t, data) => {
+  if (t) {
+    t.classList.add('anim-operators')
+    setTimeout(()=> t.classList.remove('anim-operators'), 400)
+  }
+  if (data === 'del') {
+    holdTimeount = setInterval(() => {
+      holdTime += 1
+      if (holdTime >= 3) {
+        clearInterval(holdTimeount)
+        holdTimeount = null
+        holdTime = 0
+        values = ['']
+        setOld('')
+        setEval('0')
+      }
+    }, 100)
+
+    if (value !== '') {
+      value = ''
       let old = ''
       values.forEach((el, id) => {
         if (id === values.length-1) return
@@ -128,17 +142,43 @@ const actionHandler = (i, t, data) => {
         old += el + ' '
       })
       setOld(old)
-      
-      if (values.length === 0) {
-        values.push('') 
-        setEval(0)
-      } else setEval(values[i])
+      setEval(values[i])
+      return
     }
-    if (data === 'percent') {
-      if (values[i] !== '-' &&
-          values[i] !== '÷' &&
-          values[i] !== '×' &&
-          values[i] !== '+' ) {
+    if (values[i].length>1) {
+      if (values[i].length === 2 && values[i][0] === '-') {
+        values[i] = ''
+      } else values[i] = values[i].slice(0, -1)
+      setEval(values[i])
+    } else {
+      values[i] = ''
+    }
+    if (values[i] === '') {
+      values = values.slice(0, -1)
+    }
+
+    i = values.length-1 > 0 ? values.length-1 : 0 
+    
+    let old = ''
+    values.forEach((el, id) => {
+      if (id === values.length-1) return
+      if ((el === '-' || el === '÷' ||
+          el === '×' || el === '+') && id === i ) return
+      old += el + ' '
+    })
+    setOld(old)
+    
+    if (values.length === 0) {
+      values.push('') 
+      setEval(0)
+    } else setEval(values[i])
+  }
+  if (data === 'percent') {
+    if (values.length<3) return
+    if (values[i] !== '-' &&
+        values[i] !== '÷' &&
+        values[i] !== '×' &&
+        values[i] !== '+' ) {
 
         let expression = ''
         values.forEach( el => {
@@ -273,10 +313,6 @@ const actionHandler = (i, t, data) => {
         evalHandler(i, t)
       }
     }
-
-    if (!t) return
-    t.classList.add('anim-operators')
-    setTimeout(()=> t.classList.remove('anim-operators'), 400)
 }
 
 const numberHandler = (i, t, data) => {
@@ -320,7 +356,8 @@ const numberHandler = (i, t, data) => {
     setTimeout(()=> t.classList.remove('anim-btn'), 400)
 }
 
-const clickHandler = t => {
+const clickHandler = e => {
+  let t = e.target
   const isActions = t.classList.contains('btn-actions')
   const isEval = t.classList.contains('btn-evaluate')
   const data = t.dataset.id
@@ -336,7 +373,12 @@ const clickHandler = t => {
   // console.log(values)
 }
 
-main.addEventListener('click', e => clickHandler(e.target))
+main.addEventListener('mousedown', clickHandler)
+main.addEventListener('touchstart', e => {
+  main.removeEventListener('mousedown', clickHandler)
+  clickHandler(e)
+})
+
 theme.addEventListener('click', () => {
   document.querySelector('.calc').classList.toggle('calc-white')
   localStorage.setItem('theme', document.querySelector('.calc').classList)
@@ -405,4 +447,101 @@ document.addEventListener('keydown', e => {
   if (data !== ',' && !isActions && !isEval) numberHandler(i, '', data)
   if (isActions) actionHandler(i, '', data)
   if (isEval) evalHandler(i, '')
+})
+
+
+// ---------- click
+
+let startY = null
+let posY = null 
+let distance = null
+
+const moveEndHandler = () => {
+  if (distance > 200) {
+    main.classList.add('hidden')
+    main.style.marginBottom = '-365px'
+    header.style.height = '520px'
+    distance = null
+    posY = null 
+    startY = null
+    return
+  }
+  if (distance < -200) {
+    main.classList.remove('hidden')
+    main.style.marginBottom = '0'
+    header.style.height = '153px'
+    distance = null
+    posY = null 
+    startY = null
+    return
+  } else {
+    if (!main.classList.contains('hidden')) {
+      main.style.marginBottom = '0'
+      header.style.height = '153px'
+      distance = null
+      posY = null 
+      startY = null
+    } else {
+      main.style.marginBottom = '-365px'
+      header.style.height = '520px'
+      distance = null
+      posY = null 
+      startY = null
+    }
+  }
+}
+
+const headerMoveHandler = e => {
+  if (startY === null) return
+  posY = e.screenY
+  distance = posY-startY
+  if (!main.classList.contains('hidden')) {
+    main.style.marginBottom = -distance+'px'
+  } else {
+    main.style.marginBottom = -distance-365+'px'
+  }
+}
+
+header.addEventListener('mousedown', e => {
+  startY = e.screenY
+  header.style.transition = '0s'
+  main.style.transition = '0s'
+  header.addEventListener('mousemove', headerMoveHandler)
+})
+
+document.addEventListener('mouseup', e => {
+  header.style.transition = ''
+  main.style.transition = ''
+  
+  header.removeEventListener('mousemove', headerMoveHandler)
+  moveEndHandler()
+})
+
+
+// -----------> touch
+
+const headerTouchHandler = e => {
+  if (startY === null) return
+  posY = e.touches[0].screenY
+  distance = posY-startY
+  if (!main.classList.contains('hidden')) {
+    main.style.marginBottom = -distance+'px'
+  } else {
+    main.style.marginBottom = -distance-365+'px'
+  }
+}
+
+header.addEventListener('touchstart', e => {
+  startY = e.touches[0].screenY
+  header.style.transition = '0s'
+  main.style.transition = '0s'
+  header.addEventListener('touchmove', headerTouchHandler)
+})
+
+document.addEventListener('touchend', () => {
+  header.style.transition = ''
+  main.style.transition = ''
+  
+  header.removeEventListener('touchmove', headerTouchHandler)
+  moveEndHandler()
 })
