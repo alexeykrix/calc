@@ -291,14 +291,15 @@ const actionHandler = (i, t, data) => {
     }
     if (data === 'invert') {
       i = values.length-1 > 0 ? values.length-1 : 0 
-      if (values[i] === '-' ||
+      if ((values[i] === '-' ||
         values[i] === '÷' ||
         values[i] === '×' ||
-        values[i] === '+' ) return
+        values[i] === '+') && values.length !== 1) return
       if (values[i].indexOf('-') === 0) {
         values[i] = values[i].slice(1, values[i].length)
       } else values[i] = '-' + values[i]
       setEval(values[i])
+      if (values[0]==='') setEval(0)
       i = values.length-1 > 0 ? values.length-1 : 0 
       
       let old = ''
@@ -323,10 +324,10 @@ const numberHandler = (i, t, data) => {
     i=0
     setOld('')
   }
-  if (values[i] === '-' ||
+  if ((values[i] === '-' ||
         values[i] === '÷' ||
         values[i] === '×' ||
-        values[i] === '+' ) {
+        values[i] === '+') && values.length !== 1 ) {
       let old = ''
       values.forEach((el, id) => {
         if ((el === '-' || el === '÷' ||
@@ -369,9 +370,12 @@ const clickHandler = e => {
   if (isActions) actionHandler(i, t, data)
   if (isEval) evalHandler(i, t)
 
-  // console.clear()
-  // console.log(values)
+  console.clear()
+  console.log(values)
 }
+
+
+//      --------  events
 
 main.addEventListener('mousedown', clickHandler)
 main.addEventListener('touchstart', e => {
