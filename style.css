@@ -3,6 +3,7 @@
   font-family: Nunito, Arial, Helvetica, sans-serif;
 }
 body {
+  overflow: hidden;
   height: 100%;
   background: no-repeat 
     url('https://picsum.photos/1000') center/cover, 

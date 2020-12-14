@@ -370,8 +370,8 @@ const clickHandler = e => {
   if (isActions) actionHandler(i, t, data)
   if (isEval) evalHandler(i, t)
 
-  console.clear()
-  console.log(values)
+  // console.clear()
+  // console.log(values)
 }
 
 
